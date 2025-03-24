@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+from course.models import Course, Lesson
+
+
 class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True, verbose_name='email')
@@ -17,5 +20,14 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+class Payment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    payment_date = models.DateTimeField(auto_now_add=True)
+    paid_course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True)
+    paid_lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, blank=True, null=True)
+    payment_amount = models.IntegerField(blank=True, null=True)
+    payment_method = models.CharField(max_length=20, blank=True, null=True,)
+
 
 
