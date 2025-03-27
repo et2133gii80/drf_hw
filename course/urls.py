@@ -12,7 +12,7 @@ app_name = 'course'
 router = DefaultRouter()
 router.register(r'courses', CourseViewSet, basename='courses')
 
-urlpatterns =[
+urlpatterns = [
     path('lesson/create/', views.LessonCreateAPIView.as_view(), name='lesson-create'),
     path('lesson/', views.LessonListAPIView.as_view(), name='lesson-list'),
     path('lesson/<int:pk>/', views.LessonRetrieveAPIView.as_view(), name='lesson-get'),
