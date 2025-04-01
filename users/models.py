@@ -4,17 +4,6 @@ from django.contrib.auth.models import AbstractUser
 
 from course.models import Course, Lesson
 
-# class UserManager(BaseUserManager):
-#     def create_superuser(self, email, password=None, **extra_fields):
-#         extra_fields.setdefault('is_staff', True)
-#         extra_fields.setdefault('is_superuser', True)
-#
-#         if extra_fields.get('is_staff') is not True:
-#             raise ValueError('Superuser must have is_staff=True.')
-#         if extra_fields.get('is_superuser') is not True:
-#             raise ValueError('Superuser must have is_superuser=True.')
-#
-#         return self.create_user(email, password, **extra_fields)
 
 class User(AbstractUser):
     email = models.EmailField(unique=True, verbose_name='email')
@@ -40,6 +29,8 @@ class Payment(models.Model):
     paid_lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, blank=True, null=True)
     payment_amount = models.IntegerField(blank=True, null=True)
     payment_method = models.CharField(max_length=20, blank=True, null=True,)
+
+
 
 
 

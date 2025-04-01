@@ -1,8 +1,13 @@
-from rest_framework import viewsets, generics
+from django.shortcuts import get_object_or_404
+
+from rest_framework import viewsets, generics, views
+from rest_framework.response import Response
+
+from course.paginators import CourseAndLessonPagination
 from users.permissions import IsModerator, IsOwner
 from rest_framework.permissions import IsAuthenticated
 
-from course.models import Course, Lesson
+from course.models import Course, Lesson, Subscription
 from course.serliazers import CourseSerializers, LessonSerializers, CourseDetailSerializers
 
 
@@ -10,6 +15,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializers
     filterset_fields = ('course_name',)
     queryset = Course.objects.all()
+    pagination_class = CourseAndLessonPagination
 
     def get_permissions(self):
         if self.action == 'list':
@@ -31,6 +37,30 @@ class CourseViewSet(viewsets.ModelViewSet):
         course = serializer.save(owner=self.request.user)
         course.save()
 
+    def get(self, request):
+        queryset = Course.objects.all()
+        paginated_queryset = self.paginate_queryset(queryset)
+        serializer = CourseSerializers(paginated_queryset, many=True)
+        return self.get_paginated_response(serializer.data)
+
+
+class SubscriptionAPIView(views.APIView):
+
+    def post(self, *args, **kwargs):
+        course_id = self.kwargs.get("pk")
+        course = get_object_or_404(Course, pk=course_id)
+        is_subscribe = self.request.data.get("subscribe")
+        user = self.request.user
+
+        if is_subscribe:
+            subscription = user.subscriptions.create(user=user, course=course)
+            subscription.save()
+            message = f"You've successfully subscribed for '{course.name}'"
+        else:
+            Subscription.objects.filter(user=user, course=course).delete()
+            message = f"Your subscription for '{course.name}' has been cancelled."
+        return Response({"message": message})
+
 
 class LessonCreateAPIView(generics.CreateAPIView):
     serializer_class = LessonSerializers
@@ -45,6 +75,7 @@ class LessonListAPIView(generics.ListAPIView):
     serializer_class = LessonSerializers
     queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated, IsModerator | IsOwner]
+    pagination_class = CourseAndLessonPagination
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
