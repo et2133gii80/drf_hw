@@ -31,6 +31,23 @@ class Payment(models.Model):
     payment_method = models.CharField(max_length=20, blank=True, null=True,)
 
 
+class Donation(models.Model):
+    amount = models.PositiveIntegerField()
+    session_id = models.CharField(max_length=255, blank=True, null=True)
+    link = models.URLField(max_length=400, blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
+
+
+
+    class Meta:
+        verbose_name = 'Оплата'
+        verbose_name_plural = 'Оплаты'
+
+    def __str__(self):
+        return self.amount
+
+
+
 
 
 
