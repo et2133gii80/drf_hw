@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'users',
     'course',
     'django_filters',
+
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -143,8 +145,18 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
-    ]
+    ],
 
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
+
+}
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Your Project API',
+    'DESCRIPTION': 'Your project description',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 STATIC_URL = 'static/'
@@ -160,3 +172,5 @@ MEDIA_ROOT = BASE_DIR/ 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.User'
+
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
