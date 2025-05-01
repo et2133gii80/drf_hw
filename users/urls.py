@@ -20,5 +20,6 @@ urlpatterns =[path('token/', TokenObtainPairView.as_view(), name='token_obtain_p
               path('user/', views.UserListAPIView.as_view(), name='user-list'),
               path('user/<int:pk>/', views.UserRetrieveAPIView.as_view(), name='user-get'),
               path('user/update/<int:pk>/', views.UserUpdateAPIView.as_view(), name='user-update'),
-              path('user/delete/<int:pk>/', views.UserDestroyAPIView.as_view(), name='user-delete')
+              path('user/delete/<int:pk>/', views.UserDestroyAPIView.as_view(), name='user-delete'),
+              path('donation/', views.DonationCreateAPIView.as_view(), name='donation')
              ] + router.urls
