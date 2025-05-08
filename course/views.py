@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 
-from rest_framework import viewsets, generics, views
+from rest_framework import viewsets, generics, views, status
 from rest_framework.response import Response
 
 from course.paginators import CourseAndLessonPagination
@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from course.models import Course, Lesson, Subscription
 from course.serliazers import CourseSerializers, LessonSerializers, CourseDetailSerializers
+from users.tasks import sub_update
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -16,6 +17,17 @@ class CourseViewSet(viewsets.ModelViewSet):
     filterset_fields = ('course_name',)
     queryset = Course.objects.all()
     pagination_class = CourseAndLessonPagination
+
+    def update(self, request, pk=None):
+        course = get_object_or_404(Course, pk=pk)
+        serializer = self.get_serializer(course, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            sub_update.delay(pk)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     def get_permissions(self):
         if self.action == 'list':
