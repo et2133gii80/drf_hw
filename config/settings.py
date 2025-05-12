@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
 
 import os
@@ -195,3 +195,11 @@ CELERY_TASK_TRACK_STARTED = True
 
 # Максимальное время на выполнение задачи
 CELERY_TASK_TIME_LIMIT = 30 * 60
+
+
+CELERY_BEAT_SCHEDULE = {
+    "check_last_login": {
+        "task": "users.tasks.check_inactive_users",  # Путь к задаче
+        "schedule": timedelta(weeks=4),  # Расписание выполнения задачи
+    }
+}

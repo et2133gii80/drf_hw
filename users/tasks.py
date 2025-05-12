@@ -6,17 +6,25 @@ from django.utils import timezone
 from rest_framework.generics import get_object_or_404
 import os
 from course.models import Subscription, Course
+import datetime
+
+from users.models import User
 
 
 @shared_task
 def check_inactive_users():
-    user = get_user_model()
-    inactive_users = user.objects.filter(
-        last_login__lte=timezone.now() - timedelta(days=30), is_active=True
-    )
+    today = timezone.now().date()
+    inactive_date = today - datetime.timedelta(days=30)
+    inactive_users = User.objects.filter(
+    is_active=False,
+    is_staff=False,
+    is_superuser=False,
+    last_login__isnull=False,
+    last_login__lt=inactive_date).update(is_active=False)
+
     for user in inactive_users:
-        user.is_active = False
-        user.save()
+        if user.last_login__lt >= 30:
+            user.save()
 
 
 @shared_task
