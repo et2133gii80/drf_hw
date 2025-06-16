@@ -3,27 +3,37 @@ version: '3.9'
 services:
   web:
     build: .
-    command: >
-      bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     env_file:
       - .env
-    environment:
-      - DEBUG=False
-      - DATABASE_HOST=db
     volumes:
       - .:/code
       - static_volume:/code/static
     ports:
       - "8000:8000"
-    depends_on:
-      - db
-
+    restart: on-failure
+    extra_hosts:
+      - host.docker.internal:host-gateway
+#    depends_on:
+#      - db
+  nginx:
+    build: .
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./html:/usr/share/nginx/html
   db:
+    container_name: db
     image: postgres:16
     env_file:
       - .env
-    expose:
-      - "5432"
+    environment:
+      - POSTGRES_DB=${NAME}
+      - POSTGRES_USER=${USER}
+      - POSTGRES_PASSWORD=${PASSWORD}
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -32,8 +42,7 @@ services:
 
   celery:
     build: .
-    command: >
-      bash -c "celery -A config  worker --loglevel=info --pool=eventlet"
+    command: sh -c "celery -A config.celery  worker --loglevel=INFO -B"
     env_file:
       - .env
     depends_on:
@@ -44,8 +53,7 @@ services:
     build: .
     env_file:
       - .env
-    command: >
-      bash -c "celery -A config beat --loglevel=info"
+    command: sh -c "celery -A config.celery beat "
     depends_on:
       - redis
       - db
