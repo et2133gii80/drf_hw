@@ -40,6 +40,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
             cd ${{ secrets.DEPLOY_DIR }}
+            sudo apt install python3.12-venv -y
             python3 -m venv venv
             source venv/bin/activate
             pip install -r requirements.txt
